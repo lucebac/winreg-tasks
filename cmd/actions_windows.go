@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/GDATAAdvancedAnalytics/winreg-tasks/actions"
 	"github.com/lucebac/winreg-tasks/actions"
 	"github.com/lucebac/winreg-tasks/utils"
 )
