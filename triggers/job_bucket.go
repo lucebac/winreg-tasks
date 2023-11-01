@@ -2,7 +2,7 @@
 
 package triggers
 
-import "github.com/GDATAAdvancedAnalytics/winreg-tasks/generated"
+import "github.com/lucebac/winreg-tasks/generated"
 
 type JobBucket struct {
 	Flags            uint32

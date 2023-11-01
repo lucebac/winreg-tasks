@@ -5,7 +5,7 @@ package actions
 import (
 	"fmt"
 
-	"github.com/GDATAAdvancedAnalytics/winreg-tasks/generated"
+	"github.com/lucebac/winreg-tasks/generated"
 )
 
 const ExecutionPropertiesMagic PropertiesMagic = 0x6666

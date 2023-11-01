@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GDATAAdvancedAnalytics/winreg-tasks/actions"
-	"github.com/GDATAAdvancedAnalytics/winreg-tasks/dynamicinfo"
-	"github.com/GDATAAdvancedAnalytics/winreg-tasks/triggers"
+	"github.com/lucebac/winreg-tasks/actions"
+	"github.com/lucebac/winreg-tasks/dynamicinfo"
+	"github.com/lucebac/winreg-tasks/triggers"
 	"golang.org/x/sys/windows/registry"
 )
 

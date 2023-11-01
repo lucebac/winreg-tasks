@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/GDATAAdvancedAnalytics/winreg-tasks/generated"
-	"github.com/GDATAAdvancedAnalytics/winreg-tasks/utils"
+	"github.com/lucebac/winreg-tasks/generated"
+	"github.com/lucebac/winreg-tasks/utils"
 )
 
 const WnfStateChangeTriggerMagic TriggerMagic = 0x6666

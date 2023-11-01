@@ -5,9 +5,9 @@ package triggers
 import (
 	"time"
 
-	"github.com/GDATAAdvancedAnalytics/winreg-tasks/generated"
-	"github.com/GDATAAdvancedAnalytics/winreg-tasks/utils"
 	"github.com/google/uuid"
+	"github.com/lucebac/winreg-tasks/generated"
+	"github.com/lucebac/winreg-tasks/utils"
 )
 
 type Privilege int64

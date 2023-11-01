@@ -7,8 +7,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/GDATAAdvancedAnalytics/winreg-tasks/triggers"
-	"github.com/GDATAAdvancedAnalytics/winreg-tasks/utils"
+	"github.com/lucebac/winreg-tasks/triggers"
+	"github.com/lucebac/winreg-tasks/utils"
 )
 
 func handleTriggers(args ...string) {

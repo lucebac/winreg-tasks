@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/GDATAAdvancedAnalytics/winreg-tasks/generated"
+	"github.com/lucebac/winreg-tasks/generated"
 )
 
 const SessionChangeTriggerMagic TriggerMagic = 0x7777

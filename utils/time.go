@@ -5,7 +5,7 @@ package utils
 import (
 	"time"
 
-	"github.com/GDATAAdvancedAnalytics/winreg-tasks/generated"
+	"github.com/lucebac/winreg-tasks/generated"
 )
 
 const secondsUntilEpoch = 11_644_473_600

@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/GDATAAdvancedAnalytics/winreg-tasks/generated"
 	"github.com/kaitai-io/kaitai_struct_go_runtime/kaitai"
+	"github.com/lucebac/winreg-tasks/generated"
 )
 
 var (

@@ -1,4 +1,4 @@
-module github.com/GDATAAdvancedAnalytics/winreg-tasks
+module github.com/lucebac/winreg-tasks
 
 go 1.18
 

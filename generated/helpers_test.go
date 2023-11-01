@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/GDATAAdvancedAnalytics/winreg-tasks/generated"
+	"github.com/lucebac/winreg-tasks/generated"
 )
 
 func compareExeTask(task, expected *generated.Actions_Action) error {

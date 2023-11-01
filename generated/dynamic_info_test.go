@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/GDATAAdvancedAnalytics/winreg-tasks/generated"
 	"github.com/kaitai-io/kaitai_struct_go_runtime/kaitai"
+	"github.com/lucebac/winreg-tasks/generated"
 )
 
 func TestDynamicInfo_Read_WithErrorCode(t *testing.T) {

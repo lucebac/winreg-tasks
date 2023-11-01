@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/GDATAAdvancedAnalytics/winreg-tasks/dynamicinfo"
-	"github.com/GDATAAdvancedAnalytics/winreg-tasks/utils"
+	"github.com/lucebac/winreg-tasks/dynamicinfo"
+	"github.com/lucebac/winreg-tasks/utils"
 )
 
 func dynamicInfo(args ...string) {
