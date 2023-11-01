@@ -66,9 +66,9 @@ Build
 =====
 If you did not change anything and just want to use the tool, simply download and run the pre-built exe file from the releases.
 
-If you want to build the exe file yourself or introduced changes to the source code, you can use the provided build script; the `winreg-tasks.exe` is written to the `out` folder. Just make sure, you have a working installation of Golang 1.18 (or later) and then run:
+If you want to build the exe file yourself or introduced changes to the source code, you can use the provided build script; the `winreg-tasks.exe` is written to the `out` folder. Just make sure, you have a working installation of Golang 1.21 (or later) and then run:
 ```bash
-./build.sh
+make all
 ```
 Or, if you are on a Windows platform, you might just want to install the package from source:
 ```powershell
