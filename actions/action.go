@@ -15,10 +15,6 @@ var (
 	ErrUnknownPropertiesMagic = errors.New("unknown action properties magic")
 )
 
-var (
-	ErrUnknownPropertiesMagic = errors.New("unknown action properties magic")
-)
-
 type Actions struct {
 	Context    string
 	Properties []Properties
