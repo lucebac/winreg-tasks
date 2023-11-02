@@ -66,3 +66,7 @@ func SidFromBytes(b []byte) (*SID, error) {
 
 	return sid, nil
 }
+
+func (s SID) MarshalText() ([]byte, error) {
+	return []byte(s.String()), nil
+}

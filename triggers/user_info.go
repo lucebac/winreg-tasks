@@ -3,8 +3,6 @@
 package triggers
 
 import (
-	"fmt"
-
 	"github.com/lucebac/winreg-tasks/generated"
 	"github.com/lucebac/winreg-tasks/utils"
 )
@@ -29,7 +27,7 @@ type UserInfo struct {
 	HasUser  bool
 	HasSid   bool
 	SidType  SidType
-	Sid      []byte
+	Sid      *utils.SID
 	Username string
 }
 
@@ -45,7 +43,13 @@ func NewUserInfo(gen *generated.UserInfo) (*UserInfo, error) {
 
 	if gen.SkipSid.Value == 0 {
 		userInfo.HasSid = true
-		userInfo.Sid = gen.Sid.Data[:]
+
+		var err error
+
+		if userInfo.Sid, err = utils.SidFromBytes(gen.Sid.Data[:]); err != nil {
+			return nil, err
+		}
+
 		userInfo.SidType = SidType(gen.SidType.Value)
 	}
 
@@ -58,11 +62,7 @@ func (u UserInfo) UserToString() string {
 		if u.Username != "" {
 			user = u.Username
 		} else if u.HasSid {
-			if sid, err := utils.SidFromBytes(u.Sid); err == nil {
-				user = sid.String()
-			} else {
-				user = fmt.Sprintf("<error converting sid: %s>", err)
-			}
+			user = u.Sid.String()
 		}
 	}
 	return user

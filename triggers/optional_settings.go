@@ -3,8 +3,6 @@
 package triggers
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 	"github.com/lucebac/winreg-tasks/generated"
 	"github.com/lucebac/winreg-tasks/utils"
@@ -51,34 +49,35 @@ const (
 )
 
 type OptionalSettings struct {
-	Length                  uint32
-	IdleDuration            time.Duration
-	IdleWaitTimeout         time.Duration
-	ExecutionTimeLimit      time.Duration
-	DeleteExpiredTaskAfter  time.Duration
+	length uint32
+
+	IdleDuration            utils.Duration
+	IdleWaitTimeout         utils.Duration
+	ExecutionTimeLimit      utils.Duration
+	DeleteExpiredTaskAfter  utils.Duration
 	Priority                uint32
-	RestartOnFailureDelay   time.Duration
+	RestartOnFailureDelay   utils.Duration
 	RestartOnFailureRetries uint32
 	NetworkId               uuid.UUID
 	Privileges              Privilege
-	Periodicity             time.Duration
-	Deadline                time.Duration
+	Periodicity             utils.Duration
+	Deadline                utils.Duration
 	Exclusive               bool
 }
 
 func NewOptionalSettings(gen *generated.OptionalSettings) (*OptionalSettings, error) {
-	optionalSettings := &OptionalSettings{Length: gen.Len.Value}
+	optionalSettings := &OptionalSettings{length: gen.Len.Value}
 
 	if gen.Len.Value == 0 {
 		return optionalSettings, nil
 	}
 
-	optionalSettings.IdleDuration = time.Duration(gen.IdleDurationSeconds) * time.Second
-	optionalSettings.IdleWaitTimeout = time.Duration(gen.IdleWaitTimeoutSeconds) * time.Second
-	optionalSettings.ExecutionTimeLimit = time.Duration(gen.ExecutionTimeLimitSeconds) * time.Second
-	optionalSettings.DeleteExpiredTaskAfter = time.Duration(gen.DeleteExpiredTaskAfter) * time.Second
+	optionalSettings.IdleDuration = utils.SecondsToDuration(gen.IdleDurationSeconds)
+	optionalSettings.IdleWaitTimeout = utils.SecondsToDuration(gen.IdleWaitTimeoutSeconds)
+	optionalSettings.ExecutionTimeLimit = utils.SecondsToDuration(gen.ExecutionTimeLimitSeconds)
+	optionalSettings.DeleteExpiredTaskAfter = utils.SecondsToDuration(gen.DeleteExpiredTaskAfter)
 	optionalSettings.Priority = gen.Priority
-	optionalSettings.RestartOnFailureDelay = time.Duration(gen.RestartOnFailureDelay) * time.Second
+	optionalSettings.RestartOnFailureDelay = utils.SecondsToDuration(gen.RestartOnFailureDelay)
 	optionalSettings.RestartOnFailureRetries = gen.RestartOnFailureRetries
 
 	networkId, err := uuid.FromBytes(gen.NetworkId)
@@ -87,13 +86,13 @@ func NewOptionalSettings(gen *generated.OptionalSettings) (*OptionalSettings, er
 	}
 	optionalSettings.NetworkId = networkId
 
-	if optionalSettings.Length < 0x38 {
+	if optionalSettings.length < 0x38 {
 		return optionalSettings, nil
 	}
 
 	optionalSettings.Privileges = Privilege(gen.Privileges)
 
-	if optionalSettings.Length < 0x58 {
+	if optionalSettings.length < 0x58 {
 		return optionalSettings, nil
 	}
 

@@ -3,6 +3,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/lucebac/winreg-tasks/generated"
@@ -10,7 +11,17 @@ import (
 
 const secondsUntilEpoch = 11_644_473_600
 
+var dateMin = time.Unix(0, 0)
+var dateMax = time.Date(9999, 12, 31, 23, 59, 59, 999999999, time.UTC)
+
 func TimeFromFILETIME(filetime uint64) time.Time {
+	// we need to handle the two special values 0 and -1 differently to not break golang's time struct
+	if filetime == 0 {
+		return dateMin
+	} else if filetime >= 1<<63-1 {
+		return dateMax
+	}
+
 	epoch := filetime/10_000_000 - secondsUntilEpoch
 	return time.Unix(int64(epoch), 0)
 }
@@ -33,11 +44,25 @@ func TimeFromTSTime(gen *generated.Tstime, tz *time.Location) time.Time {
 	return tt
 }
 
-func DurationFromTSTimePeriod(gen *generated.Tstimeperiod) time.Duration {
-	return time.Duration(gen.Year)*365*24*time.Hour + // TODO: check whether Microsoft really handles a year as 365 days internally
-		time.Duration(gen.Month)*30*24*time.Hour + // TODO: check whether Microsoft really handles a month as 30 days internally
-		time.Duration(gen.Day)*24*time.Hour +
-		time.Duration(gen.Hour)*time.Hour +
-		time.Duration(gen.Minute)*time.Minute +
-		time.Duration(gen.Second)*time.Second
+func DurationFromTSTimePeriod(gen *generated.Tstimeperiod) Duration {
+	return Duration{Duration: time.Duration(uint64(gen.Year)*365*24*uint64(time.Hour) + // TODO: check whether Microsoft really handles a year as 365 days internally
+		uint64(gen.Month)*30*24*uint64(time.Hour) + // TODO: check whether Microsoft really handles a month as 30 days internally
+		uint64(gen.Day)*24*uint64(time.Hour) +
+		uint64(gen.Hour)*uint64(time.Hour) +
+		uint64(gen.Minute)*uint64(time.Minute) +
+		uint64(gen.Second)*uint64(time.Second)),
+	}
+}
+
+// time.Duration does not support JSON marshalling; hence, we need a wrapper which implements it
+type Duration struct {
+	time.Duration
+}
+
+func (d Duration) MarshalJSON() ([]byte, error) {
+	return json.Marshal(d.String())
+}
+
+func SecondsToDuration(nsec uint32) Duration {
+	return Duration{Duration: time.Duration(uint64(nsec) * uint64(time.Second))}
 }

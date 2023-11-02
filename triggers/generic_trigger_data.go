@@ -12,11 +12,11 @@ import (
 type GenericTriggerData struct {
 	StartBoundary       time.Time
 	EndBoundary         time.Time
-	Delay               time.Duration
-	Timeout             time.Duration
-	RepetitionInterval  time.Duration
-	RepetitionDuration  time.Duration
-	RepetitionDuration2 time.Duration
+	Delay               utils.Duration
+	Timeout             utils.Duration
+	RepetitionInterval  utils.Duration
+	RepetitionDuration  utils.Duration
+	RepetitionDuration2 utils.Duration
 	StopAtDurationEnd   bool
 	Enabled             bool
 	Unknown             []byte
@@ -32,11 +32,11 @@ func NewGenericTriggerData(gen *generated.Triggers_GenericTriggerData, tz *time.
 	return &GenericTriggerData{
 		StartBoundary:       utils.TimeFromTSTime(gen.StartBoundary, tz),
 		EndBoundary:         utils.TimeFromTSTime(gen.EndBoundary, tz),
-		Delay:               time.Duration(gen.DelaySeconds) * time.Second,
-		Timeout:             time.Duration(gen.TimeoutSeconds) * time.Second,
-		RepetitionInterval:  time.Duration(gen.RepetitionIntervalSeconds) * time.Second,
-		RepetitionDuration:  time.Duration(gen.RepetitionDurationSeconds) * time.Second,
-		RepetitionDuration2: time.Duration(gen.RepetitionDurationSeconds2) * time.Second,
+		Delay:               utils.SecondsToDuration(gen.DelaySeconds),
+		Timeout:             utils.SecondsToDuration(gen.TimeoutSeconds),
+		RepetitionInterval:  utils.SecondsToDuration(gen.RepetitionIntervalSeconds),
+		RepetitionDuration:  utils.SecondsToDuration(gen.RepetitionDurationSeconds),
+		RepetitionDuration2: utils.SecondsToDuration(gen.RepetitionDurationSeconds2),
 		StopAtDurationEnd:   gen.StopAtDurationEnd != 0,
 		Enabled:             gen.Enabled.Value != 0,
 		Unknown:             gen.Unknown[:],

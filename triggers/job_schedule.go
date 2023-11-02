@@ -58,9 +58,9 @@ type JobSchedule struct {
 	StartBoundary      time.Time
 	EndBoundary        time.Time
 	Unknown0           time.Time
-	RepetitionInterval time.Duration
-	RepetitionDuration time.Duration
-	ExecutionTimeLimit time.Duration
+	RepetitionInterval utils.Duration
+	RepetitionDuration utils.Duration
+	ExecutionTimeLimit utils.Duration
 	Mode               TimeMode
 	// value depends on Mode setting
 	DaysOfWeek DayOfWeek
@@ -75,7 +75,7 @@ type JobSchedule struct {
 	StopTasksAtDurationEnd bool
 	Enabled                bool
 	Unknown1               uint32
-	MaxDelay               time.Duration
+	MaxDelay               utils.Duration
 }
 
 func NewJobSchedule(gen *generated.JobSchedule, tz *time.Location) (*JobSchedule, error) {
@@ -83,14 +83,14 @@ func NewJobSchedule(gen *generated.JobSchedule, tz *time.Location) (*JobSchedule
 		StartBoundary:          utils.TimeFromTSTime(gen.StartBoundary, tz),
 		EndBoundary:            utils.TimeFromTSTime(gen.EndBoundary, tz),
 		Unknown0:               utils.TimeFromTSTime(gen.Unknown0, tz),
-		RepetitionInterval:     time.Second * time.Duration(gen.RepetitionIntervalSeconds),
-		RepetitionDuration:     time.Second * time.Duration(gen.RepetitionDurationSeconds),
-		ExecutionTimeLimit:     time.Second * time.Duration(gen.ExecutionTimeLimitSeconds),
+		RepetitionInterval:     utils.SecondsToDuration(gen.RepetitionIntervalSeconds),
+		RepetitionDuration:     utils.SecondsToDuration(gen.RepetitionDurationSeconds),
+		ExecutionTimeLimit:     utils.SecondsToDuration(gen.ExecutionTimeLimitSeconds),
 		Mode:                   TimeMode(gen.Mode),
 		StopTasksAtDurationEnd: gen.StopTasksAtDurationEnd != 0,
 		Enabled:                gen.IsEnabled != 0,
 		Unknown1:               gen.Unknown1,
-		MaxDelay:               time.Second * time.Duration(gen.MaxDelaySeconds),
+		MaxDelay:               utils.SecondsToDuration(gen.MaxDelaySeconds),
 	}
 
 	switch schedule.Mode {
