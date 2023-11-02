@@ -2,7 +2,11 @@
 
 package triggers
 
-import "github.com/lucebac/winreg-tasks/generated"
+import (
+	"strings"
+
+	"github.com/lucebac/winreg-tasks/generated"
+)
 
 type JobBucket struct {
 	Flags            uint32
@@ -26,12 +30,12 @@ func NewJobBucket(gen *generated.Triggers_JobBucket) (*JobBucket, error) {
 
 	principalId := ""
 	if gen.PrincipalId != nil {
-		principalId = gen.PrincipalId.String
+		principalId = strings.Trim(gen.PrincipalId.String, "\x00")
 	}
 
 	displayName := ""
 	if gen.DisplayName != nil {
-		displayName = gen.DisplayName.String
+		displayName = strings.Trim(gen.DisplayName.String, "\x00")
 	}
 
 	return &JobBucket{
