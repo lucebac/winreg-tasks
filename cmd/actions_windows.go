@@ -6,35 +6,36 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/alecthomas/kong"
 	"github.com/lucebac/winreg-tasks/actions"
 	"github.com/lucebac/winreg-tasks/utils"
 )
 
-func actionsHandler(args ...string) {
-	key := openTaskKey(args[0])
+type actionsCommand struct {
+	Dump   bool   `help:"Dumps the contents of the Actions Value in hex." optional:"" default:"false" short:"d"`
+	TaskId string `help:"The UUID of the Task" arg:""`
+}
+
+func (a *actionsCommand) Run(ctx *kong.Context) error {
+	key := openTaskKey(a.TaskId)
 	if key == 0 {
-		log.Fatalln("cannot open task key")
+		return fmt.Errorf("cannot open task key")
 	}
 	defer key.Close()
 
-	dump := false
-	if len(args) > 1 && (args[1] == "-d" || args[1] == "--dump") {
-		dump = true
-	}
-
 	actionsRaw, _, err := key.GetBinaryValue("Actions")
 	if err != nil {
-		log.Fatalf("cannot get actions for task: %v", err)
+		return fmt.Errorf("cannot get actions for task (%v)", err)
 	}
 
-	if dump {
+	if a.Dump {
 		hex := utils.Hexdump(actionsRaw, 16)
 		fmt.Println(hex)
 	}
 
 	actions, err := actions.FromBytes(actionsRaw)
 	if err != nil {
-		log.Fatalf("cannot parse actions: %v", err)
+		return fmt.Errorf("cannot parse actions (%v)", err)
 	}
 
 	log.Println("Context: " + actions.Context)
@@ -42,19 +43,16 @@ func actionsHandler(args ...string) {
 
 	if len(actions.Properties) == 0 {
 		log.Println("\t<no actions>")
-		return
+		return nil
 	}
 
 	for _, props := range actions.Properties {
 		log.Println("\t" + props.String())
 	}
+
+	return nil
 }
 
 func init() {
-	registerCommand(Command{
-		Name:             "actions",
-		Args:             []string{"<task id>", "[-d|--dump]"},
-		RequiredArgCount: 1,
-		Func:             actionsHandler,
-	})
+	registerSubcommand(kong.DynamicCommand("actions", "Dump the Actions of a given Task.", "", &actionsCommand{}))
 }

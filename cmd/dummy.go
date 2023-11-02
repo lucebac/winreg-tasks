@@ -5,26 +5,28 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
 
-func dummy(args ...string) {
-	switch len(args) {
-	case 0:
-		fmt.Println("no args")
+	"github.com/alecthomas/kong"
+)
 
-	case 1:
-		fmt.Printf("one arg: %s\n", args[0])
+type dummyCommand struct {
+	Quiet  bool   `optional:"" default:"false" short:"q"`
+	String string `arg:""`
+}
 
-	default:
-		fmt.Printf("more than one arg: %v\n", args)
+func (d *dummyCommand) Run(ctx *kong.Context) error {
+	fmt.Println(d.String)
+	fmt.Printf("Bool: %v\n", d.Quiet)
+
+	if d.Quiet {
+		return fmt.Errorf("bool was true")
 	}
+
+	return nil
 }
 
 func init() {
-	registerCommand(Command{
-		Name: "dummy",
-		Args: []string{"[foo]", "[bar]"},
-		// RequiredArgCount: 1,
-		Func: dummy,
-	})
+	registerSubcommand(kong.DynamicCommand("dummy", "dummy command", "", &dummyCommand{}))
 }

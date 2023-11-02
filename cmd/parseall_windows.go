@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/alecthomas/kong"
 	"github.com/lucebac/winreg-tasks/actions"
 	"github.com/lucebac/winreg-tasks/dynamicinfo"
 	"github.com/lucebac/winreg-tasks/triggers"
@@ -85,47 +86,41 @@ func parseDynamicInfo(data []byte) (string, error) {
 	return ret, nil
 }
 
-func parseAll(args ...string) {
-	quiet := false
-	if len(args) > 0 && (args[0] == "-q" || args[0] == "--quiet") {
-		quiet = true
-	}
+type parseallCommand struct {
+	Quiet bool `help:"Don't output the task list, just check for parsing errors" optional:"" default:"false" short:"q"`
+}
 
+func (p *parseallCommand) Run(ctx *kong.Context) error {
 	taskDir, err := openKey(`Tasks`)
 	if err != nil {
-		log.Println(err)
-		return
+		return fmt.Errorf(`cannot open tasks key (%v)`, err)
 	}
 	defer taskDir.Close()
 
 	tasks, err := taskDir.ReadSubKeyNames(-1)
 	if err != nil {
-		log.Printf("cannot get task list from registry: %v\n", err)
-		return
+		return fmt.Errorf("cannot get task list from registry (%v)", err)
 	}
 
 	for _, taskId := range tasks {
 		key := openTaskKey(taskId)
 
-		if err := readAndParse(taskId, key, "Actions", parseActions, quiet); err != nil {
+		if err := readAndParse(taskId, key, "Actions", parseActions, p.Quiet); err != nil {
 			log.Printf("error reading Actions of task %s: %v", taskId, err)
 		}
 
-		if err := readAndParse(taskId, key, "Triggers", parseTriggers, quiet); err != nil {
+		if err := readAndParse(taskId, key, "Triggers", parseTriggers, p.Quiet); err != nil {
 			log.Printf("error reading Triggers of task %s: %v", taskId, err)
 		}
 
-		if err := readAndParse(taskId, key, "DynamicInfo", parseDynamicInfo, quiet); err != nil {
+		if err := readAndParse(taskId, key, "DynamicInfo", parseDynamicInfo, p.Quiet); err != nil {
 			log.Printf("error reading DynamicInfo of task %s: %v", taskId, err)
 		}
 	}
 
+	return nil
 }
 
 func init() {
-	registerCommand(Command{
-		Name: "parseall",
-		Args: []string{"[-q|--quiet]"},
-		Func: parseAll,
-	})
+	registerSubcommand(kong.DynamicCommand("parseall", "Parses all existing Tasks", "", &parseallCommand{}))
 }

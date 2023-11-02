@@ -7,36 +7,36 @@ import (
 	"log"
 	"time"
 
+	"github.com/alecthomas/kong"
 	"github.com/lucebac/winreg-tasks/triggers"
 	"github.com/lucebac/winreg-tasks/utils"
 )
 
-func handleTriggers(args ...string) {
-	key := openTaskKey(args[0])
+type triggersCommand struct {
+	Dump   bool   `help:"Dumps the contents of the Triggers Value in hex." optional:"" default:"false" short:"d"`
+	TaskId string `help:"The UUID of the Task" arg:""`
+}
+
+func (t *triggersCommand) Run(ctx *kong.Context) error {
+	key := openTaskKey(t.TaskId)
 	if key == 0 {
-		log.Fatalln("cannot open task key")
+		return fmt.Errorf("cannot open task key")
 	}
 	defer key.Close()
 
-	dump := false
-
-	if len(args) > 1 && (args[1] == "-d" || args[1] == "--dump") {
-		dump = true
-	}
-
 	triggersRaw, _, err := key.GetBinaryValue("Triggers")
 	if err != nil {
-		log.Fatalf("cannot get triggers for task: %v", err)
+		return fmt.Errorf("cannot get triggers for task (%v)", err)
 	}
 
-	if dump {
+	if t.Dump {
 		hex := utils.Hexdump(triggersRaw, 16)
 		fmt.Println(hex)
 	}
 
 	triggers, err := triggers.FromBytes(triggersRaw, time.Local)
 	if err != nil {
-		log.Fatalf("cannot parse triggers: %v", err)
+		return fmt.Errorf("cannot parse triggers (%v)", err)
 	}
 
 	log.Println("Header:")
@@ -54,19 +54,16 @@ func handleTriggers(args ...string) {
 	log.Println("Triggers:")
 	if len(triggers.Triggers) == 0 {
 		log.Println("\t<no triggers>")
-		return
+		return nil
 	}
 
 	for _, trigger := range triggers.Triggers {
 		log.Println("\t" + trigger.String())
 	}
+
+	return nil
 }
 
 func init() {
-	registerCommand(Command{
-		Name:             "triggers",
-		RequiredArgCount: 1,
-		Args:             []string{"<task id>", "[-d|--dump]"},
-		Func:             handleTriggers,
-	})
+	registerSubcommand(kong.DynamicCommand("triggers", "Dump the Triggers of a given Task.", "", &triggersCommand{}))
 }
