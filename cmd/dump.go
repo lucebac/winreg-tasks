@@ -21,7 +21,7 @@ type dumpCommand struct {
 	Timezone string `optional:"" help:"The timezone of the system where the Registry Hive is from. Default: Local timezone of this machine." aliases:"tz" short:"t"`
 }
 
-func (d *dumpCommand) Run(ctx *kong.Context) error {
+func (d *dumpCommand) Run(ctx *context) error {
 	var tz *time.Location = time.Local
 	var err error
 
@@ -31,24 +31,15 @@ func (d *dumpCommand) Run(ctx *kong.Context) error {
 		}
 	}
 
-	taskDir, err := openKey(`Tasks`)
+	taskIdList, err := ctx.provider.GetTaskIdList()
 	if err != nil {
 		return err
-	}
-	defer taskDir.Close()
-
-	taskList, err := taskDir.ReadSubKeyNames(-1)
-	if err != nil {
-		return fmt.Errorf("cannot get task list from registry (%v)", err)
 	}
 
 	var parsedTasks []task.Task
 
-	for _, taskId := range taskList {
-		key := openTaskKey(taskId)
-		defer key.Close()
-
-		task := task.NewTask(taskId, key)
+	for _, taskId := range taskIdList {
+		task := task.NewTask(taskId, ctx.provider)
 
 		if err := task.ParseAll(tz); err != nil {
 			log.Printf(`Cannot parse task %s: %v`, taskId, err)

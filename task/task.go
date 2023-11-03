@@ -7,12 +7,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/lucebac/winreg-tasks/actions"
 	"github.com/lucebac/winreg-tasks/dynamicinfo"
+	"github.com/lucebac/winreg-tasks/providers"
 	"github.com/lucebac/winreg-tasks/triggers"
-	"golang.org/x/sys/windows/registry"
 )
 
 type Task struct {
-	key registry.Key
+	provider providers.DataProvider
+	stringId string
 
 	Id uuid.UUID
 
@@ -22,10 +23,11 @@ type Task struct {
 	Triggers *triggers.Triggers
 }
 
-func NewTask(id string, key registry.Key) Task {
+func NewTask(id string, provider providers.DataProvider) Task {
 	return Task{
-		key: key,
-		Id:  uuid.MustParse(id),
+		provider: provider,
+		stringId: id,
+		Id:       uuid.MustParse(id),
 	}
 }
 
@@ -47,7 +49,7 @@ func (t *Task) ParseAll(tz *time.Location) error {
 
 func (t *Task) GetActions() (*actions.Actions, error) {
 	if t.Actions == nil {
-		rawData, _, err := t.key.GetBinaryValue("Actions")
+		rawData, err := t.provider.GetActions(t.stringId)
 		if err != nil {
 			return nil, err
 		}
@@ -63,7 +65,7 @@ func (t *Task) GetActions() (*actions.Actions, error) {
 
 func (t *Task) GetTriggers(tz *time.Location) (*triggers.Triggers, error) {
 	if t.Triggers == nil {
-		rawData, _, err := t.key.GetBinaryValue("Triggers")
+		rawData, err := t.provider.GetTriggers(t.stringId)
 		if err != nil {
 			return nil, err
 		}
@@ -79,7 +81,7 @@ func (t *Task) GetTriggers(tz *time.Location) (*triggers.Triggers, error) {
 
 func (t *Task) GetDynamicInfo() (*dynamicinfo.DynamicInfo, error) {
 	if t.DynamicInfo == nil {
-		rawData, _, err := t.key.GetBinaryValue("DynamicInfo")
+		rawData, err := t.provider.GetDynamicInfo(t.stringId)
 		if err != nil {
 			return nil, err
 		}

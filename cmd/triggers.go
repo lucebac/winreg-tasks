@@ -17,14 +17,8 @@ type triggersCommand struct {
 	TaskId string `help:"The UUID of the Task" arg:""`
 }
 
-func (t *triggersCommand) Run(ctx *kong.Context) error {
-	key := openTaskKey(t.TaskId)
-	if key == 0 {
-		return fmt.Errorf("cannot open task key")
-	}
-	defer key.Close()
-
-	triggersRaw, _, err := key.GetBinaryValue("Triggers")
+func (t *triggersCommand) Run(ctx *context) error {
+	triggersRaw, err := ctx.provider.GetTriggers(t.TaskId)
 	if err != nil {
 		return fmt.Errorf("cannot get triggers for task (%v)", err)
 	}

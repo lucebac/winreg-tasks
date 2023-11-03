@@ -16,14 +16,8 @@ type actionsCommand struct {
 	TaskId string `help:"The UUID of the Task" arg:""`
 }
 
-func (a *actionsCommand) Run(ctx *kong.Context) error {
-	key := openTaskKey(a.TaskId)
-	if key == 0 {
-		return fmt.Errorf("cannot open task key")
-	}
-	defer key.Close()
-
-	actionsRaw, _, err := key.GetBinaryValue("Actions")
+func (a *actionsCommand) Run(ctx *context) error {
+	actionsRaw, err := ctx.provider.GetActions(a.TaskId)
 	if err != nil {
 		return fmt.Errorf("cannot get actions for task (%v)", err)
 	}

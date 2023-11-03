@@ -16,14 +16,8 @@ type dynamicInfoCommand struct {
 	TaskId string `help:"The UUID of the Task" arg:""`
 }
 
-func (d *dynamicInfoCommand) Run(ctx *kong.Context) error {
-	key := openTaskKey(d.TaskId)
-	if key == 0 {
-		return fmt.Errorf("cannot open task key")
-	}
-	defer key.Close()
-
-	dynamicInfoRaw, _, err := key.GetBinaryValue("DynamicInfo")
+func (d *dynamicInfoCommand) Run(ctx *context) error {
+	dynamicInfoRaw, err := ctx.provider.GetDynamicInfo(d.TaskId)
 	if err != nil {
 		return fmt.Errorf("cannot get dynamic info for task (%v)", err)
 	}

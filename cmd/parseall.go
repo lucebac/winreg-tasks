@@ -12,15 +12,9 @@ import (
 	"github.com/lucebac/winreg-tasks/actions"
 	"github.com/lucebac/winreg-tasks/dynamicinfo"
 	"github.com/lucebac/winreg-tasks/triggers"
-	"golang.org/x/sys/windows/registry"
 )
 
-func readAndParse(taskId string, key registry.Key, value string, parserCallback func(data []byte) (string, error), quiet bool) error {
-	rawData, _, err := key.GetBinaryValue(value)
-	if err != nil {
-		return err
-	}
-
+func readAndParse(taskId string, rawData []byte, value string, parserCallback func(data []byte) (string, error), quiet bool) error {
 	result, err := parserCallback(rawData)
 	if err != nil {
 		return err
@@ -90,31 +84,35 @@ type parseallCommand struct {
 	Quiet bool `help:"Don't output the task list, just check for parsing errors" optional:"" default:"false" short:"q"`
 }
 
-func (p *parseallCommand) Run(ctx *kong.Context) error {
-	taskDir, err := openKey(`Tasks`)
-	if err != nil {
-		return fmt.Errorf(`cannot open tasks key (%v)`, err)
-	}
-	defer taskDir.Close()
-
-	tasks, err := taskDir.ReadSubKeyNames(-1)
+func (p *parseallCommand) Run(ctx *context) error {
+	tasks, err := ctx.provider.GetTaskIdList()
 	if err != nil {
 		return fmt.Errorf("cannot get task list from registry (%v)", err)
 	}
 
 	for _, taskId := range tasks {
-		key := openTaskKey(taskId)
-
-		if err := readAndParse(taskId, key, "Actions", parseActions, p.Quiet); err != nil {
-			log.Printf("error reading Actions of task %s: %v", taskId, err)
+		if data, err := ctx.provider.GetActions(taskId); err == nil {
+			if err := readAndParse(taskId, data, "Actions", parseActions, p.Quiet); err != nil {
+				log.Printf("error reading Actions of task %s: %v", taskId, err)
+			}
+		} else {
+			log.Printf("cannot get Actions of Task %s: %v\n", taskId, err)
 		}
 
-		if err := readAndParse(taskId, key, "Triggers", parseTriggers, p.Quiet); err != nil {
-			log.Printf("error reading Triggers of task %s: %v", taskId, err)
+		if data, err := ctx.provider.GetTriggers(taskId); err == nil {
+			if err := readAndParse(taskId, data, "Triggers", parseTriggers, p.Quiet); err != nil {
+				log.Printf("error reading Triggers of task %s: %v", taskId, err)
+			}
+		} else {
+			log.Printf("cannot get Triggers of Task %s: %v\n", taskId, err)
 		}
 
-		if err := readAndParse(taskId, key, "DynamicInfo", parseDynamicInfo, p.Quiet); err != nil {
-			log.Printf("error reading DynamicInfo of task %s: %v", taskId, err)
+		if data, err := ctx.provider.GetDynamicInfo(taskId); err == nil {
+			if err := readAndParse(taskId, data, "DynamicInfo", parseDynamicInfo, p.Quiet); err != nil {
+				log.Printf("error reading DynamicInfo of task %s: %v", taskId, err)
+			}
+		} else {
+			log.Printf("cannot get DynamicInfo of Task %s: %v\n", taskId, err)
 		}
 	}
 
