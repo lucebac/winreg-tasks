@@ -51,10 +51,16 @@ func (this *DynamicInfo) Read(io *kaitai.Stream, parent interface{}, root *Dynam
 		return err
 	}
 	this.LastErrorCode = uint32(tmp5)
-	tmp6, err := this._io.ReadU8le()
+	tmp6, err := this._io.EOF()
 	if err != nil {
 		return err
 	}
-	this.LastSuccessfulRunTime = uint64(tmp6)
+	if (!(tmp6)) {
+		tmp7, err := this._io.ReadU8le()
+		if err != nil {
+			return err
+		}
+		this.LastSuccessfulRunTime = uint64(tmp7)
+	}
 	return err
 }

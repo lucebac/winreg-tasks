@@ -16,3 +16,4 @@ seq:
     type: u4
   - id: last_successful_run_time
     type: u8
+    if: not _io.eof
