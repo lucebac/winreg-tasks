@@ -93,7 +93,7 @@ func getUUIDFromTaskPath(path string) (string, error) {
 }
 
 func openKey(subKey string) (registry.Key, error) {
-	return registry.OpenKey(registry.LOCAL_MACHINE, taskKeyBase+subKey, registry.QUERY_VALUE|registry.ENUMERATE_SUB_KEYS)
+	return registry.OpenKey(registry.LOCAL_MACHINE, `SOFTWARE\`+taskKeyBase+subKey, registry.QUERY_VALUE|registry.ENUMERATE_SUB_KEYS)
 }
 
 func openTaskKey(keyId string) registry.Key {

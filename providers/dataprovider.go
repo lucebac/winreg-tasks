@@ -17,5 +17,5 @@ var (
 )
 
 const (
-	taskKeyBase = `SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\`
+	taskKeyBase = `Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\`
 )

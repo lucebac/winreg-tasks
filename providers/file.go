@@ -37,7 +37,7 @@ func (p *FileProvider) Close() {
 }
 
 func (p FileProvider) getValueData(taskId, valueName string) ([]byte, error) {
-	key := p.reg.OpenKey(taskKeyBase + taskId)
+	key := p.reg.OpenKey(taskKeyBase + `Tasks\` + taskId)
 	if key == nil {
 		return nil, ErrCannotOpenKey
 	}
