@@ -16,7 +16,7 @@ func registerSubcommand(f kong.Option) {
 }
 
 type cli struct {
-	File *os.File `help:"If provided, use this Hive file instead of the System's live one." short:"f" type:"existingfile" optional:""`
+	File *os.File `help:"If provided, use this Hive file instead of the System's live one." short:"f" optional:""`
 }
 
 type context struct {
