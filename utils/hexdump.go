@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// Hexdump converst the byte array into an ascii hex dump with lineLength elements per line
 func Hexdump(data []byte, lineLength int) string {
 	str := ""
 

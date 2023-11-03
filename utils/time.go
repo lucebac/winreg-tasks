@@ -63,6 +63,10 @@ type Duration struct {
 }
 
 func (d Duration) MarshalJSON() ([]byte, error) {
+	if d.Duration.Seconds() >= 0xffffffff {
+		return json.Marshal("infinity")
+	}
+
 	return json.Marshal(d.String())
 }
 

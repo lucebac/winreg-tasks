@@ -3,6 +3,7 @@
 package triggers
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -52,4 +53,18 @@ func (t WnfStateChangeTrigger) String() string {
 		`<WnfStateChange state_name="%s" data="%s">`,
 		utils.Hexdump(t.StateName, len(t.StateName)), utils.Hexdump(t.Data, len(t.Data)),
 	)
+}
+
+func (t WnfStateChangeTrigger) MarshalJSON() ([]byte, error) {
+	var s struct {
+		GenericData *GenericTriggerData
+		StateName   string
+		Data        string
+	}
+
+	s.GenericData = t.GenericData
+	s.StateName = utils.Hexdump(t.StateName, len(t.StateName))
+	s.Data = string(t.Data)
+
+	return json.Marshal(s)
 }
