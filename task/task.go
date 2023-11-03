@@ -2,6 +2,7 @@
 package task
 
 import (
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -33,15 +34,15 @@ func NewTask(id string, provider providers.DataProvider) Task {
 
 func (t *Task) ParseAll(tz *time.Location) error {
 	if _, err := t.GetActions(); err != nil {
-		return err
+		log.Printf("cannot get Actions of Task %s: %v", t.stringId, err)
 	}
 
 	if _, err := t.GetTriggers(tz); err != nil {
-		return err
+		log.Printf("cannot get Triggers of Task %s: %v", t.stringId, err)
 	}
 
 	if _, err := t.GetDynamicInfo(); err != nil {
-		return err
+		log.Printf("cannot get DynamicInfo of Task %s: %v", t.stringId, err)
 	}
 
 	return nil
