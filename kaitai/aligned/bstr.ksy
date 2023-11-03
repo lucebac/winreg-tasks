@@ -11,7 +11,7 @@ seq:
     type: aligned_u4
   - id: string
     size: byte_count.value
-    encoding: utf-16le
+    encoding: UTF-16LE
     type: str
   - id: block_padding
     size: (8 - (byte_count.value % 8)) % 8

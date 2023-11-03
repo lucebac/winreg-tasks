@@ -12,7 +12,7 @@ seq:
   - id: content
     size: byte_count
     if: string_length.value > 0
-    encoding: utf-16le
+    encoding: UTF-16LE
     type: str
   - id: padding
     size: (8 - (byte_count % 8)) % 8

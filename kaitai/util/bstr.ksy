@@ -9,5 +9,5 @@ seq:
     type: u4
   - id: str
     type: str
-    encoding: utf-16le
+    encoding: UTF-16LE
     size: len
