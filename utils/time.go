@@ -11,19 +11,22 @@ import (
 
 const secondsUntilEpoch = 11_644_473_600
 
-var dateMin = time.Unix(0, 0)
+var dateMin = time.Date(1601, 1, 1, 0, 0, 0, 0, time.UTC)
 var dateMax = time.Date(9999, 12, 31, 23, 59, 59, 999999999, time.UTC)
 
 func TimeFromFILETIME(filetime uint64) time.Time {
-	// we need to handle the two special values 0 and -1 differently to not break golang's time struct
-	if filetime == 0 {
+	epoch := int64(filetime/10_000_000) - secondsUntilEpoch
+
+	// we need to cap negative values (any datetime before 1970-01-01)
+	// and excessively large positive values (any datetime after 9999-12-31T23:59:59.99999999)
+	// because otherwise JSON serialization of timestamps fails
+	if epoch < 0 {
 		return dateMin
-	} else if filetime >= 1<<63-1 {
+	} else if epoch >= dateMax.Unix() {
 		return dateMax
 	}
 
-	epoch := filetime/10_000_000 - secondsUntilEpoch
-	return time.Unix(int64(epoch), 0)
+	return time.Unix(epoch, 0)
 }
 
 // TimeFromTSTime turns a generated TSTime object into a Golang time.Time.
