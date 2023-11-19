@@ -8,8 +8,10 @@ import (
 )
 
 type FileProvider struct {
-	f   *os.File
-	reg *regparser.Registry
+	f           *os.File
+	rebuiltHive *os.File
+	logFiles    []*os.File
+	reg         *regparser.Registry
 }
 
 var (
@@ -17,15 +19,22 @@ var (
 	ErrValueNotFound = errors.New("value not found")
 )
 
-func NewFileProvider(f *os.File) (DataProvider, error) {
-	reg, err := regparser.NewRegistry(f)
+func NewFileProvider(f *os.File, logFiles ...*os.File) (DataProvider, error) {
+	rebuiltHive, err := regparser.RecoverHive(f, logFiles...)
+	if err != nil {
+		return nil, err
+	}
+
+	reg, err := regparser.NewRegistry(rebuiltHive)
 	if err != nil {
 		return nil, err
 	}
 
 	return &FileProvider{
-		reg: reg,
-		f:   f,
+		rebuiltHive: rebuiltHive,
+		reg:         reg,
+		f:           f,
+		logFiles:    logFiles,
 	}, nil
 }
 
@@ -34,6 +43,17 @@ func (p *FileProvider) Close() {
 
 	p.f.Close()
 	p.f = nil
+
+	for _, f := range p.logFiles {
+		f.Close()
+	}
+	p.logFiles = nil
+
+	if p.rebuiltHive != nil {
+		p.rebuiltHive.Close()
+		os.Remove(p.rebuiltHive.Name())
+		p.rebuiltHive = nil
+	}
 }
 
 func (p FileProvider) getValueData(taskId, valueName string) ([]byte, error) {
