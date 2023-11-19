@@ -4,6 +4,7 @@ package utils
 
 import (
 	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/lucebac/winreg-tasks/generated"
@@ -72,4 +73,20 @@ func (d Duration) MarshalJSON() ([]byte, error) {
 
 func SecondsToDuration(nsec uint32) Duration {
 	return Duration{Duration: time.Duration(uint64(nsec) * uint64(time.Second))}
+}
+
+const RFC3339NoTimezone = "2006-01-02T15:04:05.999999999"
+
+func ParseWindowsTimestamp(s string) (*time.Time, error) {
+	t, err := time.Parse(RFC3339NoTimezone, s)
+	if err == nil {
+		return &t, nil
+	}
+
+	t, err = time.Parse(time.RFC3339, s)
+	if err == nil {
+		return &t, nil
+	}
+
+	return nil, errors.New("unexpected timestamp format")
 }
