@@ -16,7 +16,8 @@ func registerSubcommand(f kong.Option) {
 }
 
 type cli struct {
-	File *os.File `help:"If provided, use this Hive file instead of the System's live one." short:"f" optional:""`
+	File     *os.File   `help:"If provided, use this Hive file instead of the System's live one." short:"f" optional:""`
+	LogFiles []*os.File `help:"If provided, these log files will be applied to the Hive file." short:"x" optional:""`
 }
 
 type context struct {
@@ -32,7 +33,7 @@ func main() {
 	context := &context{}
 
 	if c.File != nil {
-		context.provider, err = providers.NewFileProvider(c.File)
+		context.provider, err = providers.NewFileProvider(c.File, c.LogFiles...)
 		ctx.FatalIfErrorf(err)
 	} else {
 		context.provider, err = providers.GetNativeSystemProvider()
