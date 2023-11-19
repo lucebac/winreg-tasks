@@ -1,9 +1,12 @@
 package providers
 
 import (
+	"encoding/binary"
 	"errors"
 	"os"
+	"time"
 
+	"github.com/lucebac/winreg-tasks/utils"
 	"www.velocidex.com/golang/regparser"
 )
 
@@ -105,4 +108,34 @@ func (p FileProvider) GetTaskIdList() ([]string, error) {
 	}
 
 	return taskList, nil
+}
+
+func (p FileProvider) GetStringField(taskId, fieldName string) (string, error) {
+	raw, err := p.getValueData(taskId, fieldName)
+	if err != nil {
+		return "", err
+	}
+
+	return utils.ConvertBytesToStringUTF16(raw)
+}
+
+func (p FileProvider) GetBytesField(taskId, fieldName string) ([]byte, error) {
+	return p.getValueData(taskId, fieldName)
+}
+
+func (p FileProvider) GetDwordField(taskId, fieldName string) (uint32, error) {
+	raw, err := p.getValueData(taskId, fieldName)
+	if err != nil {
+		return 0, err
+	}
+
+	return binary.LittleEndian.Uint32(raw[:4]), nil
+}
+
+func (p FileProvider) GetDateField(taskId, fieldName string) (*time.Time, error) {
+	dateString, err := p.GetStringField(taskId, fieldName)
+	if err != nil {
+		return nil, err
+	}
+	return utils.ParseWindowsTimestamp(dateString)
 }

@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
+	"github.com/lucebac/winreg-tasks/utils"
 	"golang.org/x/sys/windows/registry"
 )
 
@@ -58,6 +60,44 @@ func (p WindowsRegistryProvider) GetDynamicInfo(taskId string) ([]byte, error) {
 	}
 
 	return actionsRaw, nil
+}
+
+func (p WindowsRegistryProvider) GetStringField(taskId, fieldName string) (string, error) {
+	key := openTaskKey(taskId)
+	if key == 0 {
+		return "", fmt.Errorf("cannot open task key")
+	}
+
+	val, _, err := key.GetStringValue(fieldName)
+	return val, err
+}
+
+func (p WindowsRegistryProvider) GetBytesField(taskId, fieldName string) ([]byte, error) {
+	key := openTaskKey(taskId)
+	if key == 0 {
+		return nil, fmt.Errorf("cannot open task key")
+	}
+
+	val, _, err := key.GetBinaryValue(fieldName)
+	return val, err
+}
+
+func (p WindowsRegistryProvider) GetDwordField(taskId, fieldName string) (uint32, error) {
+	key := openTaskKey(taskId)
+	if key == 0 {
+		return 0, fmt.Errorf("cannot open task key")
+	}
+
+	val, _, err := key.GetIntegerValue(fieldName)
+	return uint32(val), err
+}
+
+func (p WindowsRegistryProvider) GetDateField(taskId, fieldName string) (*time.Time, error) {
+	dateString, err := p.GetStringField(taskId, fieldName)
+	if err != nil {
+		return nil, err
+	}
+	return utils.ParseWindowsTimestamp(dateString)
 }
 
 func (p WindowsRegistryProvider) GetTaskIdList() ([]string, error) {
