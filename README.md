@@ -94,45 +94,43 @@ go install github.com/lucebac/winreg-tasks/cmd@latest
 ```
 
 # Using the Generated Code
-At least for golang, using the generated code is as simple as importing this repository as a package. The Golang files located in `./golang/cmd/` may serve as examples on how to use this package.
+To get started, add winreg-tasks to you dependencies: `go get github.com/lucebac/winreg-tasks`.
 
-Minimum example:
+After that, you can use the `FromBytes` methods of any of the packages (e.g. `actions`, `dynamicinfo`, `triggers`) to convert the raw byte representation of these information to a nicely accessible Go structure.
+
+Minimum example for Windows (except for the Registry access in this example, there's no difference in the use of the package between the platforms):
 ```golang
 package main
 
 import (
-	"bytes"
-	"fmt"
 	"log"
 
-	"github.com/lucebac/winreg-tasks/generated"
-	"github.com/kaitai-io/kaitai_struct_go_runtime/kaitai"
+	"github.com/lucebac/winreg-tasks/dynamicinfo"
 	"golang.org/x/sys/windows/registry"
 )
 
 func main() {
 	key, err := registry.OpenKey(registry.LOCAL_MACHINE, `SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tasks\{B75AF762-3C5C-4C74-ADB1-B99F98FDE0E5}`, registry.QUERY_VALUE)
 	if err != nil {
-		fmt.Printf("cannot open task key: %v", err)
-		return
+		log.Fatalf("cannot open task key: %v", err)
 	}
 	defer key.Close()
 
 	dynamicInfoRaw, _, err := key.GetBinaryValue("DynamicInfo")
 	if err != nil {
-		fmt.Printf("cannot get dynamic info for task: %v", err)
-		return
+		log.Fatalf("cannot get dynamic info for task: %v", err)
 	}
 
-	dynamicInfo := generated.NewDynamicInfo()
-	if err = dynamicInfo.Read(kaitai.NewStream(bytes.NewReader(dynamicInfoRaw)), dynamicInfo, dynamicInfo); err != nil {
-		fmt.Printf("cannot parse dynamic info: %v", err)
-		return
+	dynamicInfo, err := dynamicinfo.FromBytes(dynamicInfoRaw)
+	if err != nil {
+		log.Fatalf("cannot parse bytes into DynamicInfo: %v", err)
 	}
 
 	lastErrorCode := dynamicInfo.LastErrorCode
 	log.Printf("Last Error Code: 0x%08x", lastErrorCode)
 }
+
+
 ```
 
 
