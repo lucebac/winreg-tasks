@@ -2,11 +2,11 @@ package providers
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
 	"github.com/lucebac/winreg-tasks/utils"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/sys/windows/registry"
 )
 
@@ -143,7 +143,7 @@ func openTaskKey(keyId string) registry.Key {
 	case strings.HasPrefix(keyId, `\`):
 		keyId, err = getUUIDFromTaskPath(keyId)
 		if err != nil {
-			log.Printf("cannot convert task path to uuid: %v\n", err)
+			log.Error().Err(err).Str("keyId", keyId).Msg("cannot convert task path to uuid")
 			return 0
 		}
 		fallthrough
@@ -151,13 +151,13 @@ func openTaskKey(keyId string) registry.Key {
 	case strings.HasPrefix(keyId, `{`):
 		key, err := openKey(`Tasks\` + keyId)
 		if err != nil {
-			log.Printf("cannot open key %s: %v\n", keyId, err)
+			log.Error().Err(err).Str("keyId", keyId).Msg("cannot open key")
 			return 0
 		}
 		return key
 
 	default:
-		log.Printf("task id unknown. must start with \\ or {")
+		log.Error().Str("keyId", keyId).Msg("task id unknown. must start with \\ or {")
 		return 0
 	}
 }

@@ -4,7 +4,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/alecthomas/kong"
@@ -33,26 +32,26 @@ func (t *triggersCommand) Run(ctx *context) error {
 		return fmt.Errorf("cannot parse triggers (%v)", err)
 	}
 
-	log.Println("Header:")
-	log.Printf("\tVersion: %d", triggers.Header.Version)
-	log.Printf("\tStartBoundary: %s", triggers.Header.StartBoundary.String())
-	log.Printf("\tEndBoundary: %s", triggers.Header.EndBoundary.String())
+	fmt.Println("Header:")
+	fmt.Printf("\tVersion: %d", triggers.Header.Version)
+	fmt.Printf("\tStartBoundary: %s", triggers.Header.StartBoundary.String())
+	fmt.Printf("\tEndBoundary: %s", triggers.Header.EndBoundary.String())
 
-	log.Println("JobBucket:")
-	log.Printf("\tFlags: %08x", triggers.JobBucket.Flags)
-	log.Printf("\tCRC32: %08x", triggers.JobBucket.Crc32)
-	log.Printf("\tPrincipal ID: %s", triggers.JobBucket.PrincipalId)
-	log.Printf("\tDisplay Name: %s", triggers.JobBucket.DisplayName)
-	log.Printf("\tUser: %s", triggers.JobBucket.UserInfo.UserToString())
+	fmt.Println("JobBucket:")
+	fmt.Printf("\tFlags: %08x", triggers.JobBucket.Flags)
+	fmt.Printf("\tCRC32: %08x", triggers.JobBucket.Crc32)
+	fmt.Printf("\tPrincipal ID: %s", triggers.JobBucket.PrincipalId)
+	fmt.Printf("\tDisplay Name: %s", triggers.JobBucket.DisplayName)
+	fmt.Printf("\tUser: %s", triggers.JobBucket.UserInfo.UserToString())
 
-	log.Println("Triggers:")
+	fmt.Println("Triggers:")
 	if len(triggers.Triggers) == 0 {
-		log.Println("\t<no triggers>")
+		fmt.Println("\t<no triggers>")
 		return nil
 	}
 
 	for _, trigger := range triggers.Triggers {
-		log.Println("\t" + trigger.String())
+		fmt.Println("\t" + trigger.String())
 	}
 
 	return nil
