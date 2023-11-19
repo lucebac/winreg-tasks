@@ -22,3 +22,13 @@ windows: windows-i386 windows-amd64
 
 .PHONY: linux
 linux: linux-i386 linux-amd64
+
+.PHONY: i386
+i386: linux-i386 windows-i386
+
+.PHONY: amd64
+amd64: linux-amd64 windows-amd64
+
+.PHONY: targets
+targets:
+	@LC_ALL=C $(MAKE) -pRrq -f $(firstword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/(^|\n)# Files(\n|$$)/,/(^|\n)# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | grep -E -v -e '^[^[:alnum:]]' -e '^$@$$'

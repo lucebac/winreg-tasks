@@ -1,11 +1,43 @@
-winreg-tasks
-============
+# winreg-tasks
 
 This repository contains structure definitions and some tooling for the BLOBs found in the TaskCache registry key on Windows (`HKLM\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache`). [I wrote a blog post](https://cyber.wtf/?p=1923) which gives some background knowledge on what this is all about.
 
-To successfully run the tool, it must be launched from a command window with elevated privileges. Otherwise, the tool cannot read the registry keys which are needed to display the requested information.
+This tool can be run in two different modes:
+* accessing live Registry data (this requires administrative privileges so that all registry keys can be accessed)
+* using a raw Hive file (log files can be applied if provided)
 
-Examples:
+Since v0.4.0, winreg-tasks is platform-independent with official support for both Windows and Linux. You probably can also compile it for any other platform supported by Golang, but official support is only provided for Windows and Linux.
+
+winreg-tasks has several features. Consult the help pages for more specific information on the sub commands. The main help page lists all available commands for your platform (example shows the help page on Linux using winreg-tasks v0.5.0):
+
+```
+Usage: winreg-tasks-linux-amd64 <command>
+
+Flags:
+  -h, --help                       Show context-sensitive help.
+  -f, --file=FILE                  If provided, use this Hive file instead of the System's live one.
+  -x, --log-files=LOG-FILES,...    If provided, these log files will be applied to the Hive file.
+
+Commands:
+  actions <task-id>
+    Dump the Actions of a given Task.
+
+  dump
+    Dump the Task list to a file
+
+  dynamicinfo <task-id>
+    Dump the DynamicInfo of a given Task.
+
+  parseall
+    Parses all existing Tasks
+
+  triggers <task-id>
+    Dump the Triggers of a given Task.
+
+Run "winreg-tasks-linux-amd64 <command> --help" for more information on a command.
+```
+
+Here's a list of example commands:
 ```powershell
 # display the available commands:
 .\winreg-tasks.exe [-h|--help]
@@ -16,6 +48,11 @@ Examples:
 # same as before but only prints errors; most useful when you
 # changed something and want to see if anything broke
 .\winreg-tasks.exe parseall -q
+
+# dumps all tasks on the system and prints the result to stdout
+.\winreg-tasks.exe dump
+# dumps all tasks and writes the data into a JSONL file
+.\winreg-tasks.exe dump -o tasks.jsonl
 
 # get a more detailed dump of the actions of a task:
 .\winreg-tasks.exe actions '{00000000-1111-2222-3333-444444444444}'
@@ -33,50 +70,30 @@ Examples:
 .\winreg-tasks.exe dynamicinfo '\My Task'
 ```
 
-All commands (except `parseall`) support the `-d` or `--dump` flag which prints the data read from the registry key as a 16 bytes wide hex dump. I found it much more easy to work with these dumps than exporting a value of a key with regedit and then converting the `hex:00,11,22,...` notation to something more readable.
+Several commands support the `-d` or `--dump` flag which prints the data read from the registry key as a 16 bytes wide hex dump. I found it much more easy to work with these dumps than exporting a value of a key with regedit and then converting the `hex:00,11,22,...` notation to something more readable.
 
-Generate
-========
+## Generate
 
-If you want to re-generate the source files, just use the `generate.sh` script. If you need another language, please adapt the script to your needs.
+If you want to re-generate the source files, just use the `generate.sh` script. If you need to output the source for another language, please adapt the script to your needs. The script requires Kaitai v0.10 or later to function properly, please refer to the Kaitai's documentation for [installation instructions](https://kaitai.io/#download).
 
-**Note**: the current release (v0.9) version of kaitai does not support UTF16 strings in Golang. You need to compile the upstream version from Github. Since I don't know anything about scala, the steps below might not be how it's supposed to be done. It works, however, so you might want stick with the following commands if you're not familiar with scala either:
+
+## Build
+
+If you did not change anything and just want to use the tool, simply download and run any pre-built executable files from the releases.
+
+If you want to build the executables by yourself or want introduced changes to the source code, you can use the provided Makefile; all output files are written to the `out` folder. Just make sure, you have a working installation of Golang 1.21 (or later) and then run:
 ```bash
-# install sbt and scala 2.X (important: it MUST be scala 2.X; the lastest release 3.X is incompatible); I use sdkman and would everyone else encourage to do so as well
-sdk install sbt
-sdk install scala 2.13.8
-
-# clone kaitai-struct-compiler
-git clone https://github.com/kaitai-io/kaitai_struct_compiler ~/projects/kaitai
-cd ~/projects/kaitai
-
-# generate the staging package (this is where I'm pretty sure there is a much more efficient way to do this):
-sbt stage
-
-# cd into package sources
-git clone https://github.com/lucebac/winreg-tasks ~/projects/winreg-tasks
-cd ~/projects/winreg-tasks
-
-# run generate script
-KAITAI_COMPILER=~/projects/kaitai/jvm/target/universal/stage/bin/kaitai-struct-compiler ./generate.sh
+make
 ```
+The Makefile has several targets (e.g. `windows` or `linux`) which limit the executables that will be built. Use `make targets` to display a full list of targets.
 
-
-Build
-=====
-If you did not change anything and just want to use the tool, simply download and run the pre-built exe file from the releases.
-
-If you want to build the exe file yourself or introduced changes to the source code, you can use the provided build script; the `winreg-tasks.exe` is written to the `out` folder. Just make sure, you have a working installation of Golang 1.21 (or later) and then run:
+## Install From Source
+Alternatively, you can just install and run the package from source:
 ```bash
-make all
-```
-Or, if you are on a Windows platform, you might just want to install the package from source:
-```powershell
 go install github.com/lucebac/winreg-tasks/cmd@latest
 ```
 
-Using the Generated Code
-========================
+# Using the Generated Code
 At least for golang, using the generated code is as simple as importing this repository as a package. The Golang files located in `./golang/cmd/` may serve as examples on how to use this package.
 
 Minimum example:
@@ -119,12 +136,5 @@ func main() {
 ```
 
 
-Licensing
-=========
-Copyright 2022 G DATA Advanced Analytics GmbH
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+# Licensing
+winreg-tasks is released under the MIT license. See the LICENSE file for more information.
