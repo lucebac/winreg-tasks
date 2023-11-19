@@ -7,6 +7,8 @@ import (
 
 	"github.com/alecthomas/kong"
 	"github.com/lucebac/winreg-tasks/providers"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 var subcommands []kong.Option
@@ -18,6 +20,9 @@ func registerSubcommand(f kong.Option) {
 type cli struct {
 	File     *os.File   `help:"If provided, use this Hive file instead of the System's live one." short:"f" optional:""`
 	LogFiles []*os.File `help:"If provided, these log files will be applied to the Hive file." short:"x" optional:""`
+
+	LogLevel  string `help:"Set log level" short:"l" optional:"" default:"info" enum:"debug,info,warn,error"`
+	LogFormat string `help:"Set the log format" optional:"" default:"plain" enum:"plain,json"`
 }
 
 type context struct {
@@ -27,18 +32,29 @@ type context struct {
 func main() {
 	var err error
 
-	c := &cli{}
-	ctx := kong.Parse(c, append(subcommands, kong.UsageOnError())...)
+	args := &cli{}
+	kongContext := kong.Parse(args, append(subcommands, kong.UsageOnError())...)
 
 	context := &context{}
 
-	if c.File != nil {
-		context.provider, err = providers.NewFileProvider(c.File, c.LogFiles...)
-		ctx.FatalIfErrorf(err)
-	} else {
-		context.provider, err = providers.GetNativeSystemProvider()
-		ctx.FatalIfErrorf(err)
+	// logging setup
+	if args.LogFormat == "plain" {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	}
 
-	ctx.FatalIfErrorf(ctx.Run(context))
+	logLevel, err := zerolog.ParseLevel(args.LogLevel)
+	kongContext.FatalIfErrorf(err)
+	zerolog.SetGlobalLevel(logLevel)
+
+	// setup data provider
+	if args.File != nil {
+		context.provider, err = providers.NewFileProvider(args.File, args.LogFiles...)
+		kongContext.FatalIfErrorf(err)
+	} else {
+		context.provider, err = providers.GetNativeSystemProvider()
+		kongContext.FatalIfErrorf(err)
+	}
+
+	// run command
+	kongContext.FatalIfErrorf(kongContext.Run(context))
 }

@@ -4,7 +4,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -12,6 +11,7 @@ import (
 	"github.com/lucebac/winreg-tasks/actions"
 	"github.com/lucebac/winreg-tasks/dynamicinfo"
 	"github.com/lucebac/winreg-tasks/triggers"
+	"github.com/rs/zerolog/log"
 )
 
 func readAndParse(taskId string, rawData []byte, value string, parserCallback func(data []byte) (string, error), quiet bool) error {
@@ -21,7 +21,7 @@ func readAndParse(taskId string, rawData []byte, value string, parserCallback fu
 	}
 
 	if !quiet {
-		log.Printf("Task %s - %s: %s", taskId, value, result)
+		log.Info().Str("taskId", taskId).Msg(fmt.Sprintf("%s: %s", value, result))
 	}
 
 	return nil
@@ -93,26 +93,26 @@ func (p *parseallCommand) Run(ctx *context) error {
 	for _, taskId := range tasks {
 		if data, err := ctx.provider.GetActions(taskId); err == nil {
 			if err := readAndParse(taskId, data, "Actions", parseActions, p.Quiet); err != nil {
-				log.Printf("error reading Actions of task %s: %v", taskId, err)
+				log.Error().Err(err).Str("taskId", taskId).Msg("cannot parse Actions")
 			}
 		} else {
-			log.Printf("cannot get Actions of Task %s: %v\n", taskId, err)
+			log.Error().Err(err).Str("taskId", taskId).Msg("cannot retrieve Actions data")
 		}
 
 		if data, err := ctx.provider.GetTriggers(taskId); err == nil {
 			if err := readAndParse(taskId, data, "Triggers", parseTriggers, p.Quiet); err != nil {
-				log.Printf("error reading Triggers of task %s: %v", taskId, err)
+				log.Error().Err(err).Str("taskId", taskId).Msg("cannot parse Triggers")
 			}
 		} else {
-			log.Printf("cannot get Triggers of Task %s: %v\n", taskId, err)
+			log.Error().Err(err).Str("taskId", taskId).Msg("cannot retrieve Triggers data")
 		}
 
 		if data, err := ctx.provider.GetDynamicInfo(taskId); err == nil {
 			if err := readAndParse(taskId, data, "DynamicInfo", parseDynamicInfo, p.Quiet); err != nil {
-				log.Printf("error reading DynamicInfo of task %s: %v", taskId, err)
+				log.Error().Err(err).Str("taskId", taskId).Msg("cannot parse DynamicInfo")
 			}
 		} else {
-			log.Printf("cannot get DynamicInfo of Task %s: %v\n", taskId, err)
+			log.Error().Err(err).Str("taskId", taskId).Msg("cannot retrieve DynamicInfo data")
 		}
 	}
 

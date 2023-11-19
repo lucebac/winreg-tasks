@@ -4,7 +4,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/alecthomas/kong"
 	"github.com/lucebac/winreg-tasks/actions"
@@ -32,16 +31,16 @@ func (a *actionsCommand) Run(ctx *context) error {
 		return fmt.Errorf("cannot parse actions (%v)", err)
 	}
 
-	log.Println("Context: " + actions.Context)
-	log.Println(`Actions:`)
+	fmt.Println("Context: " + actions.Context)
+	fmt.Println(`Actions:`)
 
 	if len(actions.Properties) == 0 {
-		log.Println("\t<no actions>")
+		fmt.Println("\t<no actions>")
 		return nil
 	}
 
 	for _, props := range actions.Properties {
-		log.Println("\t" + props.String())
+		fmt.Println("\t" + props.String())
 	}
 
 	return nil

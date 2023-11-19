@@ -4,7 +4,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/alecthomas/kong"
 	"github.com/lucebac/winreg-tasks/dynamicinfo"
@@ -32,11 +31,11 @@ func (d *dynamicInfoCommand) Run(ctx *context) error {
 		return fmt.Errorf("cannot parse DynamicInfo (%v)", err)
 	}
 
-	log.Printf("Creation Time: %s", dynamicInfo.CreationTime.String())
-	log.Printf("Last Run Time: %s", dynamicInfo.LastRunTime.String())
-	log.Printf("Task State: 0x%08x", dynamicInfo.TaskState)
-	log.Printf("Last Error Code: 0x%08x", dynamicInfo.LastErrorCode)
-	log.Printf("Last Successful Run Time: %s", dynamicInfo.LastSuccessfulRunTime.String())
+	fmt.Printf("Creation Time: %s", dynamicInfo.CreationTime.String())
+	fmt.Printf("Last Run Time: %s", dynamicInfo.LastRunTime.String())
+	fmt.Printf("Task State: 0x%08x", dynamicInfo.TaskState)
+	fmt.Printf("Last Error Code: 0x%08x", dynamicInfo.LastErrorCode)
+	fmt.Printf("Last Successful Run Time: %s", dynamicInfo.LastSuccessfulRunTime.String())
 
 	return nil
 }

@@ -5,16 +5,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
 	"github.com/alecthomas/kong"
 	"github.com/lucebac/winreg-tasks/task"
+	"github.com/rs/zerolog/log"
 )
-
-func handleDump(args ...string) {
-}
 
 type dumpCommand struct {
 	Outfile  string `optional:"" help:"Path to file to write output to. Otherwise the output is written to stdout." short:"o"`
@@ -42,7 +39,7 @@ func (d *dumpCommand) Run(ctx *context) error {
 		task := task.NewTask(taskId, ctx.provider)
 
 		if err := task.ParseAll(tz); err != nil {
-			log.Printf(`Cannot parse task %s: %v`, taskId, err)
+			log.Error().Err(err).Str("taskId", taskId).Msg(`cannot parse task`)
 			continue
 		}
 
